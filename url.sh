@@ -1,6 +1,10 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 set -ux
+=======
+set -u
+>>>>>>> 85eeb07d0375eddd6b6d4003807f03d7f1d77d81
 
 starttime=`date +'%Y-%m-%d %H:%M:%S'`
 

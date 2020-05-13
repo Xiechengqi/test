@@ -15,6 +15,7 @@ jobs:
       uses: actions/checkout@master
     - name: bash url_update.sh
       run: |
+        cp index.backup index.html
         chmod +x url_update.sh
         bash url_update.sh
         cat index.html

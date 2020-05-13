@@ -1,33 +1,40 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -ux
 
 starttime=`date +'%Y-%m-%d %H:%M:%S'`
 
+echo "------------ start -------------"
 
-echo "                            ------------ start -------------"
+wget -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" "https://site.ip138.com/gitee.io" -O gitee.io-ip-search &> /dev/null
 
-wget -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" "https://site.ip138.com/gitee.io" -O gitee-ip-search &> /dev/null
+cat ./gitee.io-ip-search | grep -o -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | uniq > gitee.io-real-ip
 
-# 匹配 ip 并去重
-grep -o -E "([0-9]{1,3}\.){3}[0-9]{1,3}" gitee-ip-search | uniq > gitee-real-ip
+echo "----------- execute for loop ------------"
 
-echo "                         ----------- execute for loop ------------"
-
-for ip in `cat gitee-real-ip`
+for ip in `cat gitee.io-real-ip`
 do
 wget -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" "https://site.ip138.com/"$ip -O $ip"-url-search" &> /dev/null
-grep '"date"' $ip"-url-search" |awk -F '("/|/")' '{print $2}' > $ip"-real-url"
+if [[ $? -ne 0 ]];then
+rm -rf $ip"-url-search"
+continue
+fi
+cat $ip"-url-search" | grep '"date"' |awk -F '("/|/")' '{print $2}' > $ip"-real-url"
 rm -rf $ip"-url-search"
 
-if [[ `grep "gitee.io" $ip"-real-url" | wc -l` -eq 0 ]];then
+if [[ `cat $ip"-real-url" | grep "gitee.io" | wc -l` -eq 0 ]];then
 rm $ip"-url-search" $ip"-real-url" -rf
 continue
 fi
 
 for j in `cat $ip"-real-url"`
 do
-res=`curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" -s --head -L "https://"$j --connect-timeout 3 | grep "HTTP/" | awk '{printf $2}'`
+curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" -s --head -L "https://"$j --connect-timeout 3 -o url-head.txt
+if [[ $? -ne 0 ]];then
+continue
+fi
+res=`grep "HTTP" url-head.txt | awk '{printf $2}'`
+> url-head.txt
 if [[ $res -eq 200 ]]
 then
 echo $j >> all-real-url
@@ -37,18 +44,15 @@ done
 rm $ip"-real-url" -rf
 done
 
-echo "                ----------------- 第一个 for loop 结束 ------------------"
-
 cat all-real-url | awk '!a[$0]++' > real-urls 
 rm all-real-url -rf
 
-echo "                ----------------- 第二个 for loop 开始 ------------------"
 for j in `cat real-urls`
 do
 curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" -s -L "https://"$j -o tmp
 if [[ $? -eq 0 ]]
 then
-title=`grep -m 1 "<title>" tmp | awk -F '</title>' '{print $1}' | awk -F '>' '{print $NF}'`
+title=$(cat tmp | head -`cat tmp | grep -n -m 1 "</head>" | awk -F ':' '{print $1}'` | grep "<title>"  | awk -F '</title>' '{print $1}' | awk -F '>' '{print $NF}')
 rm -rf ./tmp
 if [[ "$title" = "" ]]
 then
@@ -66,9 +70,8 @@ echo '  <a href="https://'$j'" target="_blank">
     </a>' >> index.html
 fi
 done
-echo "                           -------------- 第二个for loop 结束 -----------"
 
-rm gitee-real-ip gitee-ip-search real-urls -rf
+rm -rf gitee.io-ip-search gitee.io-real-ip real-urls url-head.txt
 
 
 endtime=`date +'%Y-%m-%d %H:%M:%S'`

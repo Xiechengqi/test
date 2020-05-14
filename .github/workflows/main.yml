@@ -18,7 +18,6 @@ jobs:
         chmod +x url_update.sh
         bash url_update.sh
         cat index.html
-        echo "----------  finish -----------"
     - name: set git config 
       run: |
         git config --global user.name "Xiechengqi"
@@ -29,13 +28,12 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}">/home/runner/.ssh/id_rsa 
         chmod 600 /home/runner/.ssh/id_rsa
         ssh-keyscan -t rsa "github.com">>/home/runner/.ssh/known_hosts
-    - name: deploy
+        ssh-keyscan -t rsa "gitee.com">>/home/runner/.ssh/known_hosts
+    - name: set logfile
       run: |
-        echo "--------- log start -----------"
-        git log --pretty=format:"%s from Github Actions at `date +"%Y-%m-%d %H:%M:%S"`" --date=short -n 1  > commit-message.log
-    - name: deploy
+        git log --pretty=format:"%s from Github Actions at `TZ=UTC-8 date +"%Y-%m-%d %H:%M:%S"`" --date=short -n 1  > commit-message.log
+    - name: deploy github
       run: |
-        echo "------------ git clone start ------------"
         git clone git@github.com:Xiechengqi/test.git .test
         cd .test
         git checkout master
@@ -43,7 +41,18 @@ jobs:
         \cp -rf ./* ./.test/
         cd .test
         rm commit-message.log -rf
-        ls -al
         git add .
         git commit -F ../commit-message.log
         git push --force --quiet "git@github.com:Xiechengqi/test.git" master:master
+    - name: deploy gitee
+      run: |
+        git clone git@gitee.com:Xiechengqi/test.git .gitee-test
+        cd .gitee-test
+        git checkout master
+        cd ../
+        \cp -rf ./* ./.gitee-test/
+        cd .gitee-test
+        rm commit-message.log -rf
+        git add .
+        git commit -F ../commit-message.log
+        git push --force --quiet "git@gitee.com:Xiechengqi/test.git" master:master

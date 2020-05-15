@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ux
+set -u
 
 starttime=`date +'%Y-%m-%d %H:%M:%S'`
 
@@ -44,7 +44,6 @@ rm $ip"-real-url" -rf
 done
 
 awk '!a[$0]++' all-real-url > real-urls 
-rm all-real-url -rf
 
 for j in `cat real-urls`
 do
@@ -70,7 +69,7 @@ echo '  <a href="https://'$j'" target="_blank">
 fi
 done
 
-rm -rf gitee.io-ip-search gitee.io-real-ip real-urls url-head.txt
+rm -rf gitee.io-ip-search gitee.io-real-ip url-head.txt
 
 
 endtime=`date +'%Y-%m-%d %H:%M:%S'`

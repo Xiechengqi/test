@@ -8,6 +8,9 @@ echo "------------ start -------------"
 
 wget -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" "https://site.ip138.com/gitee.io" -O gitee.io-ip-search &> /dev/null
 grep -o -E "([0-9]{1,3}\.){3}[0-9]{1,3}" gitee.io-ip-search | uniq > gitee.io-real-ip
+wget -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36" "https://site.ip138.com/github.io" -O github.io-ip-search &> /dev/null
+grep -o -E "([0-9]{1,3}\.){3}[0-9]{1,3}" github.io-ip-search | uniq >> gitee.io-real-ip
+
 
 echo "----------- execute for loop ------------"
 
@@ -69,7 +72,7 @@ echo '  <a href="https://'$j'" target="_blank">
 fi
 done
 
-rm -rf gitee.io-ip-search gitee.io-real-ip url-head.txt
+rm -rf gitee.io-ip-search gitee.io-real-ip url-head.txt github.io-ip-search
 
 
 endtime=`date +'%Y-%m-%d %H:%M:%S'`

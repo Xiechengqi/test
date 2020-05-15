@@ -26,6 +26,7 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}">/home/runner/.ssh/id_rsa 
         chmod 600 /home/runner/.ssh/id_rsa
         ssh-keyscan -t rsa "github.com">>/home/runner/.ssh/known_hosts
+        ssh-keyscan -t rsa "gitee.com">>/home/runner/.ssh/known_hosts
     - name: set logfile
       run: |
         git log --pretty=format:"%s from Github Actions at `TZ=UTC-8 date +"%Y-%m-%d %H:%M:%S"`" --date=short -n 1  > commit-message.log

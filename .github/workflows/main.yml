@@ -43,12 +43,8 @@ jobs:
         ls -al
     - name: deploy to gitee
       run: |
-        cd ../
-        ls -al
-        pwd
         git clone git@gitee.com:Xiechengqi/test.git .gitee-test
         cd .gitee-test
-        ls -al
         git checkout master
         cd ../
         \cp -rf ./* ./.gitee-test/

@@ -4,6 +4,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,19 +26,32 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}">/home/runner/.ssh/id_rsa 
         chmod 600 /home/runner/.ssh/id_rsa
         ssh-keyscan -t rsa "github.com">>/home/runner/.ssh/known_hosts
+        ssh-keyscan -t rsa "gitee.com">>/home/runner/.ssh/known_hosts
     - name: set logfile
       run: |
         git log --pretty=format:"%s from Github Actions at `TZ=UTC-8 date +"%Y-%m-%d %H:%M:%S"`" --date=short -n 1  > commit-message.log
     - name: deploy github
       run: |
-        git clone git@github.com:Xiechengqi/test.git .github_repo
-        cd .github_repo
+        git clone git@github.com:Xiechengqi/test.git .test
+        cd .test
         git checkout master
         cd ../
-        \cp -rf ./* ./.github_repo/
-        cd .github_repo
-        rm -rf commit-message.log
+        \cp -rf ./* ./.test/
+        cd .test
         git add .
         git commit -F ../commit-message.log
         git push --force --quiet "git@github.com:Xiechengqi/test.git" master:master
-        echo `pwd`
+        pwd
+    - name: deploy gitee
+      run: |
+
+        git clone git@gitee.com:Xiechengqi/test.git .gitee-test
+        cd .gitee-test
+        git checkout master
+        cd ../
+        \cp -rf ./* ./.gitee-test/
+        cd .gitee-test
+        rm commit-message.log -rf
+        git add .
+        git commit -F ../commit-message.log
+        git push --force --quiet "git@gitee.com:Xiechengqi/test.git" master:master

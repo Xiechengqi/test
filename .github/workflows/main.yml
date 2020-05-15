@@ -14,6 +14,7 @@ jobs:
     - name: bash url_update.sh
       run: |
         cp backup index.html
+        echo 'hello' >> index.html
     - name: set git config 
       run: |
         git config --global user.name "Xiechengqi"
